@@ -4,3 +4,6 @@ test.py
 test.ipynb
 
 __pycache__
+
+application_train_without_nan.csv
+application_test_df_without_nan.csv
