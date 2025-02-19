@@ -1,0 +1,7 @@
+Env/
+data_raw/
+test.py
+test.ipynb
+
+__pycache__
+
