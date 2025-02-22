@@ -2,13 +2,13 @@ import seaborn as sns
 import matplotlib.pyplot as plt 
 import numpy as np
 import pandas as pd
-from sklearn.preprocessing import MinMaxScaler ,StandardScaler
+from sklearn.preprocessing import MinMaxScaler ,StandardScaler,RobustScaler
 
 
 
 # AFFICHER LES DISTRIBUTIONS (HISTOGRAMMES  ET BOXPLOTS)
 
-def distributions(df, nrows, ncols):
+def distributions(df, nrows=1, ncols=2):
   """
   Affiche histogrammes et boxplotS  des colonnes numériques d'un dataframe
   """
@@ -103,6 +103,25 @@ def handle_outlier_winsor(data:pd.DataFrame) -> pd.DataFrame:
 
 
 #  FEATURE SCALING 
+
+def scaling(data: pd.DataFrame) -> pd.DataFrame:
+    """
+    Met toutes les colonnes numériques d'un dataset sur une même échelle,
+    """
+
+    data = data.copy()  # Éviter de modifier le dataset original
+    
+    cols_to_scale = [col for col in data.select_dtypes('number').columns if col not in ["SK_ID_CURR", "SK_BUREAU_ID", "SK_ID_PREV"]]
+    
+    # Création des scalers
+    minmax_scaler = MinMaxScaler()
+    standard_scaler = StandardScaler()
+    robust_scaler=RobustScaler()
+    
+    data= pd.DataFrame(robust_scaler.fit_transform(data[cols_to_scale]), columns=cols_to_scale)
+
+       
+    return data
 
 
    
