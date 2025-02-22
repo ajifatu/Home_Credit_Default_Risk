@@ -1,0 +1,6 @@
+Env/
+data_raw/
+test.py
+test.ipynb
+.DS_Store
+__pycache__
