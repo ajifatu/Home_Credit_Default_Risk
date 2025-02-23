@@ -190,6 +190,7 @@ def drop_more_threshold_nan_columns(data: pd.DataFrame,threshold:float) -> pd.Da
 
 
 def handle_missing_values(data:pd.DataFrame) -> pd.DataFrame:
+    data=data.copy()
     #drop_more_threshold_nan_columns(data,50)
     impute_nan_with_mean(data)
     impute_nan_with_median(data)
