@@ -13,4 +13,5 @@ def distributions(df, nrows=1, ncols=2):
     fig, axes = plt.subplots(nrows, ncols)
     sns.histplot(df[col], bins= 20,ax = axes[0])
     sns.boxplot(x = df[col], ax = axes[1], showmeans=True)
-  plt.show()
+    plt.show()
+    plt.close(fig)
