@@ -9,6 +9,7 @@ from modules import handle_outliers as ho
 
 # pour les données(distribution) asymétriques 
 def replace_outliers_IQR(data,factor=1.5)->pd.DataFrame:
+    data=data.copy()
     for col in data.select_dtypes('number').columns:
         if not (-0.5 <= data[col].skew() <= 0.5):
             Q1 = np.quantile(data[col], 0.25)
@@ -25,6 +26,7 @@ def replace_outliers_IQR(data,factor=1.5)->pd.DataFrame:
 # pour les données symétriques 
 
 def replace_outliers_Zscore(data:pd.DataFrame, threshold:int=3) -> pd.DataFrame:
+    data=data.copy()
     for col in data.select_dtypes('number').columns:
         if -0.5 <= data[col].skew() <= 0.5:
             u = np.mean(data[col])   
@@ -78,6 +80,7 @@ def remove_outliers(df, method='iqr', threshold=1.5, z_thresh=3):
 
 # pour les données asymétriques 
 def handle_outlier_winsor(data:pd.DataFrame) -> pd.DataFrame:
+    data=data.copy()
     ''' ca permet de remplacer les valeurs aberrantes par des percentiles calcules à partir seuils choisis'''
     for col in data.select_dtypes('number').columns:
         if not (-0.5 <= data[col].skew() <=0.5):
@@ -89,7 +92,22 @@ def handle_outlier_winsor(data:pd.DataFrame) -> pd.DataFrame:
 
 
 def handle_outliers(data:pd.DataFrame) -> pd.DataFrame:
-    data=ho.replace_outliers_IQR(data)
-    data=ho.replace_outliers_Zscore(data,2)
+    data=data.copy()
+    # Sélection des colonnes numériques
+    numeric_cols = data.select_dtypes(include=['number']).columns.tolist()
+    
+    # Identification des colonnes dichotomiques (0 et 1)
+    cols_dichotomiques = [col for col in numeric_cols if data[col].dropna().isin([0, 1]).all()]
+    
+    # Colonnes à exclure du scaling
+    cols_exclues = ["SK_ID_CURR", "SK_BUREAU_ID", "SK_ID_PREV"]
+    
+    # Colonnes à imputer les outliers
+    cols_to_impute_outliers = [col for col in numeric_cols if col not in cols_dichotomiques + cols_exclues]
+    for col in cols_to_impute_outliers:
+        if data[col].skew() < -0.5 or data[col].skew() > 0.5:
+            data[col] = replace_outliers_IQR(data[[col]])
+        else:
+            data[col] = replace_outliers_Zscore(data[[col]])
     
     return data
