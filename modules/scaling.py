@@ -6,18 +6,17 @@ from sklearn.preprocessing import MinMaxScaler ,StandardScaler,RobustScaler
 
 #  FEATURE SCALING 
 
-def scaling(data: pd.DataFrame) -> pd.DataFrame:
+def scaling_robust_scaler(data: pd.DataFrame) -> pd.DataFrame:
     """
-    Met toutes les colonnes numériques d'un dataset sur une même échelle,
+    Met toutes les colonnes numériques d'un dataset sur une même échelle.
+    Applicable sur n'importe qu'elle  distribution sauf Normal 
     """
 
     data = data.copy()  # Éviter de modifier le dataset original
     
-    cols_to_scale = [col for col in data.select_dtypes('number').columns if col not in ["SK_ID_CURR", "SK_BUREAU_ID", "SK_ID_PREV"]]
+    cols_to_scale = [col for col in data.select_dtypes('number').columns if col not in ["SK_ID_CURR","TARGET", "SK_BUREAU_ID", "SK_ID_PREV"]]
     
     # Création des scalers
-    minmax_scaler = MinMaxScaler()
-    standard_scaler = StandardScaler()
     robust_scaler=RobustScaler()
     
     data= pd.DataFrame(robust_scaler.fit_transform(data[cols_to_scale]), columns=cols_to_scale)
@@ -56,29 +55,29 @@ def scaling_2(data:pd.DataFrame) -> pd.DataFrame:
 
 
 
-def scaling_with_na(data: pd.DataFrame) -> pd.DataFrame:
+def scaling(data: pd.DataFrame) -> pd.DataFrame:
     """
     Met toutes les colonnes numériques d'un dataset sur une même échelle,
-    tout en gérant les valeurs aberrantes et les NaN.
     """
 
     data = data.copy()  # Éviter de modifier le dataset original
-    cols_to_scale = [col for col in data.select_dtypes('number').columns if col not in ["SK_ID_CURR", "SK_BUREAU_ID", "SK_ID_PREV"]]
+    cols_dichotomiques=[col for col in  data.select_dtypes("number").columns 
+                    if data[col].isin([0,1]).all()]
+    cols_to_scale = [col for col in data.select_dtypes('number').columns if col not in ["SK_ID_CURR","TARGET" "SK_BUREAU_ID", "SK_ID_PREV"]
+                     and  col not in cols_dichotomiques]
     
     # Création des scalers
     minmax_scaler = MinMaxScaler()
     standard_scaler = StandardScaler()
     
     for col in cols_to_scale:
-        # Remplacement des NaN par la médiane
-        data[col].fillna(data[col].median(), inplace=True)
         
         # Vérification de l'asymétrie
         if not (-0.5 <= data[col].skew() <= 0.5):  # Asymétrique
-            data[col] = hs.replace_outliers_IQR(data[col])
-            data[col] = minmax_scaler.fit_transform(data[[col]])  # MinMaxScaler
+            #data[col] = hs.replace_outliers_IQR(data[col])
+            data[col] = pd.DataFrame(minmax_scaler.fit_transform(data[[col]]))  # MinMaxScaler
         else:  # Symétrique
-            data[col] = hs.replace_outliers_Zscore(data[col])
-            data[col] = standard_scaler.fit_transform(data[[col]])  # StandardScaler
+            #data[col] = hs.replace_outliers_Zscore(data[col])
+            data[col] = pd.DataFrame(standard_scaler.fit_transform(data[[col]]))  # StandardScaler
             
     return data
